@@ -70,5 +70,5 @@ so it's more important to have a descriptive than a catchy name!
 What if I think that one of the pinnings is wrong or out of date?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Please feel free to `open an issue <https://github.com/astrofrog/oldest-supported-numpy/issues/new>`_
+Please feel free to `open an issue <https://github.com/scipy/oldest-supported-numpy/issues/new>`_
 or a pull request if you think something is wrong or could be improved!
