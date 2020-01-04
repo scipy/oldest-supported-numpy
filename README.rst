@@ -5,9 +5,20 @@
 About
 -----
 
-This is a meta-package which can be used in ``pyproject.toml`` files to
-automatically provide the oldest supported version of Numpy without having to
-list them all. In other words::
+This is a meta-package which can be used in ``pyproject.toml`` files
+to automatically provide as a build-time dependency the oldest version
+of Numpy that supports the given Python version and platform. In case
+of platforms for which Numpy has prebuilt wheels, the provided version
+also has a prebuilt Numpy wheel.
+
+The reason to use the oldest available Numpy version as a build-time
+dependency is because of ABI compatibility. Binaries compiled with old
+Numpy versions are binary compatible with newer Numpy versions, but
+not vice versa. This meta-package exists to make dealing with this
+more convenient, without having to duplicate the same list manually in
+all packages requiring it.
+
+In other words::
 
     [build-system]
     requires = [
