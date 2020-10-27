@@ -15,7 +15,8 @@ jobs:
         - 3.7
         - 3.8
         - 3.9
-        - 3.10.0-alpha - 3.10.0
+        # Uncomment once Numpy builds fine with Python 3.10
+        # - 3.10.0-alpha - 3.10.0
 
     steps:
     - uses: actions/checkout@v2
