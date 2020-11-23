@@ -18,19 +18,23 @@ not vice versa. This meta-package exists to make dealing with this
 more convenient, without having to duplicate the same list manually in
 all packages requiring it.
 
-In other words::
+In other words:
+
+.. code:: toml
 
     [build-system]
     requires = [
         "wheel",
         "setuptools",
-        "numpy==1.13.3; python_version=='3.5',
-        "numpy==1.13.3; python_version=='3.6',
-        "numpy==1.14.5; python_version=='3.7',
-        "numpy==1.17.3; python_version>='3.8'
+        "numpy==1.13.3; python_version=='3.5'",
+        "numpy==1.13.3; python_version=='3.6'",
+        "numpy==1.14.5; python_version=='3.7'",
+        # more numpy requirements...
     ]
 
-can be replaced by::
+can be replaced by:
+
+.. code:: toml
 
     [build-system]
     requires = ["wheel", "setuptools", "oldest-supported-numpy"]
