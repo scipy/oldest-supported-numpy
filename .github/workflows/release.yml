@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+
+      - name: Install twine
+        run: pip install twine
+
+      - name: Build
+        run: python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        run: |
+          twine upload -r testpypi dist/*
+          # twine upload dist/*
