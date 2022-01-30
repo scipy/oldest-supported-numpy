@@ -18,7 +18,7 @@ jobs:
           architecture: 'x64'
 
       - name: Install twine
-        run: pip install twine
+        run: pip install twine build
 
       - name: Build
         run: python -m build
@@ -28,5 +28,4 @@ jobs:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
         run: |
-          twine upload -r testpypi dist/*
-          # twine upload dist/*
+          twine upload dist/*
