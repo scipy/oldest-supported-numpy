@@ -31,7 +31,7 @@ def get_package_dependencies() -> list[Requirement]:
 
 # The ordering of these markers is important, and is used in test names.
 # The tests, when run, look like: PyPy-3.6-Linux-aarch64` (bottom-first)
-@pytest.mark.parametrize("platform_machine", ["x86_64", "aarch64", "s390x", "arm64"])
+@pytest.mark.parametrize("platform_machine", ["x86_64", "aarch64", "s390x", "arm64", "loongarch64"])
 @pytest.mark.parametrize("platform_system", ["Linux", "Windows", "Darwin", "AIX"])
 @pytest.mark.parametrize("python_version", ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"])
 @pytest.mark.parametrize("platform_python_implementation", ["CPython", "PyPy"])
@@ -43,7 +43,7 @@ def test_has_at_most_one_pinned_dependency(
 ):
     # These are known to be platforms that are not valid / possible at this time.
     if platform_system == "AIX":
-        if platform_machine == "aarch64":
+        if platform_machine in ["aarch64", "loongarch64"]:
             pytest.skip("AIX and aarch64 are mutually exclusive.")
         if platform_python_implementation == "PyPy":
             pytest.skip("AIX and PyPy are mutually exclusive.")
