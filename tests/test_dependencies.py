@@ -31,7 +31,7 @@ def get_package_dependencies() -> list[Requirement]:
 
 # The ordering of these markers is important, and is used in test names.
 # The tests, when run, look like: PyPy-3.6-Linux-aarch64` (bottom-first)
-@pytest.mark.parametrize("platform_machine", ["x86_64", "aarch64", "s390x", "arm64", "loongarch64"])
+@pytest.mark.parametrize("platform_machine", ["x86", "x86_64", "aarch64", "s390x", "arm64", "loongarch64"])
 @pytest.mark.parametrize("platform_system", ["Linux", "Windows", "Darwin", "AIX"])
 @pytest.mark.parametrize("python_version", ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"])
 @pytest.mark.parametrize("platform_python_implementation", ["CPython", "PyPy"])
