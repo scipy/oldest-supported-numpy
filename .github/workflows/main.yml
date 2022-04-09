@@ -3,10 +3,50 @@ name: Basic tests
 on: [push, pull_request]
 
 jobs:
-  test:
+  test_pins:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - run: pip install -r tests/requirements.txt
-      - run: pytest
+      - run: pytest -k test_has_at_most_one_pinned_dependency
+
+  test_install:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 4
+      matrix:
+        os: [ 'windows-latest', 'macos-latest', 'ubuntu-latest' ]
+        python: [ '3.6', '3.7', '3.8', '3.9', '3.10' ]
+        arch: [ 'x64', 'x86' ]
+        qemu: [ 'yes', 'no' ]
+        exclude:
+          - os: macos-latest
+            arch: x86
+          - os: ubuntu-latest
+            arch: x86
+          - os: windows-latest
+            qemu: yes
+          - os: macos-latest
+            qemu: yes
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.arch }}
+
+      - name: Set up QEMU
+        if: ${{ matrix.qemu == 'yes' }}
+        uses: docker/setup-qemu-action@v1.2.0
+
+      - name: Install oldest Numpy
+        run: pip install . --only-binary numpy
+
+      - name: Install test dependencies
+        run: pip install -r tests/requirements.txt
+
+      - name: Test valid numpy installed
+        run: pytest -k test_valid_numpy_is_installed
