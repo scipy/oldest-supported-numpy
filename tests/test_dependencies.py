@@ -3,8 +3,9 @@
 
 import configparser
 import pprint
-from functools import cache
+from functools import lru_cache
 from pathlib import Path
+from typing import List
 
 import pytest
 from packaging.requirements import Requirement
@@ -16,8 +17,8 @@ def is_pinned(requirement: Requirement) -> bool:
     return "==" in str(requirement.specifier)
 
 
-@cache
-def get_package_dependencies() -> list[Requirement]:
+@lru_cache(maxsize=None)
+def get_package_dependencies() -> List[Requirement]:
     """A cached reader for getting dependencies of this package."""
     parser = configparser.ConfigParser()
     parser.read(SETUP_CFG_FILE)
@@ -71,3 +72,17 @@ def test_has_at_most_one_pinned_dependency(
     assert (
         len(filtered_requirements) <= 1
     ), f"Expected no more than one pin.\n{pprint.pformat(environment)}"
+
+
+def test_valid_numpy_is_installed():
+    filtered_requirements = []
+    for req in get_package_dependencies():
+        if req.marker.evaluate():
+            filtered_requirements.append(req)
+
+    assert (len(filtered_requirements) == 1), "Expected exactly one pin."
+
+    item, = filtered_requirements[0].specifier
+
+    import numpy
+    assert item.version == numpy.__version__
