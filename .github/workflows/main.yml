@@ -29,6 +29,9 @@ jobs:
             qemu: yes
           - os: macos-latest
             qemu: yes
+          - os: windows-latest
+            python: '3.10'
+            arch: x86
 
     steps:
       - uses: actions/checkout@v2
