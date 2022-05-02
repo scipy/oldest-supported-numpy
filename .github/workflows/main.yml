@@ -19,16 +19,11 @@ jobs:
         os: [ 'windows-latest', 'macos-latest', 'ubuntu-latest' ]
         python: [ '3.6', '3.7', '3.8', '3.9', '3.10' ]
         arch: [ 'x64', 'x86' ]
-        qemu: [ 'yes', 'no' ]
         exclude:
           - os: macos-latest
             arch: x86
           - os: ubuntu-latest
             arch: x86
-          - os: windows-latest
-            qemu: yes
-          - os: macos-latest
-            qemu: yes
 
     steps:
       - uses: actions/checkout@v2
@@ -37,10 +32,6 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           architecture: ${{ matrix.arch }}
-
-      - name: Set up QEMU
-        if: ${{ matrix.qemu == 'yes' }}
-        uses: docker/setup-qemu-action@v1.2.0
 
       - name: Install oldest Numpy
         run: pip install . --only-binary numpy
