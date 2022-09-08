@@ -7,13 +7,13 @@ About
 
 This is a meta-package which can be used in ``pyproject.toml`` files
 to automatically provide as a build-time dependency the oldest version
-of Numpy that supports the given Python version and platform. In case
-of platforms for which Numpy has prebuilt wheels, the provided version
-also has a prebuilt Numpy wheel.
+of NumPy that supports the given Python version and platform. In case
+of platforms for which NumPy has prebuilt wheels, the provided version
+also has a prebuilt NumPy wheel.
 
-The reason to use the oldest available Numpy version as a build-time
+The reason to use the oldest available NumPy version as a build-time
 dependency is because of ABI compatibility. Binaries compiled with old
-Numpy versions are binary compatible with newer Numpy versions, but
+NumPy versions are binary compatible with newer NumPy versions, but
 not vice versa. This meta-package exists to make dealing with this
 more convenient, without having to duplicate the same list manually in
 all packages requiring it.
@@ -45,15 +45,15 @@ need to be updated.
 Q&A
 ---
 
-Why define the Numpy pinnings using install_requires in this repository?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Why define the NumPy pinnings using ``install_requires`` in this repository?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Numpy version pinnings are defined inside the ``setup.cfg`` file as
+The NumPy version pinnings are defined inside the ``setup.cfg`` file as
 ``install_requires`` dependencies, rather than as build-time dependencies
-inside ``pyproject.toml``. This is deliberate, since Numpy is not actually
+inside ``pyproject.toml``. This is deliberate, since NumPy is not actually
 required to build wheels of **oldest-supported-numpy**. What we need here
 is to make sure that when **oldest-supported-numpy** is installed into
-the build environment of a package using it, Numpy gets installed too
+the build environment of a package using it, NumPy gets installed too
 as a **runtime** dependency inside the build environment.
 
 Another way to think about this is that since we only publish (universal)
@@ -62,17 +62,60 @@ wheels of **oldest-supported-numpy**, the wheel contains no ``pyproject.toml``,
 dependencies which get installed by pip when **oldest-supported-numpy** is
 installed.
 
-Can I use this if my package requires a recent version of Numpy?
+Can I use this if my package requires a recent version of NumPy?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In many cases, even though your package may require a version of
-Numpy that is more recent than the pinned versions here, this
+NumPy that is more recent than the pinned versions here, this
 is often a runtime requirement, i.e. for running (rather than
 building) your package. In many cases, unless you use recent
-features of the Numpy C API, you will still be able to build your
-package with an older version of Numpy and therefore you will still
+features of the NumPy C API, you will still be able to build your
+package with an older version of NumPy and therefore you will still
 be able to use **oldest-supported-numpy**. You can still impose a
-more recent Numpy requirement in ``install_requires``
+more recent NumPy requirement in ``install_requires``
+
+What if a bug in NumPy that affects me is fixed only in a newer release?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If **oldest-supported-numpy** pins a ``numpy`` version that is broken for
+everyone using a certain OS/platform/interpreter combination, we can update the
+``==`` pin to a newer release. In general, building against a newer *bugfix*
+release (i.e., a higher ``Y`` value for a ``1.X.Y`` version number) is safe to
+do. Newer minor versions will likely not be ABI-compatible, so are much more
+difficult to change. If a bug only affects some uses cases (e.g., versions ``<
+1.20.3`` don't work on Windows when using ``f2py``), the pin cannot be updated
+because it will affect backwards compatibility of **oldest-supported-numpy**.
+In that case, it is recommended that you add the needed constraint directly
+in your own ``pyproject.toml`` file. For example:
+
+.. code:: toml
+
+    [build-system]
+    requires = [
+        "wheel",
+        "numpy==1.19.0; python_version<='3.8' and platform_system=='Windows' and platform_python_implementation != 'PyPy'",
+        "oldest-supported-numpy; python_version>'3.8' or platform_system!='Windows' or platform_python_implementation == 'PyPy'",
+        # more requirements (if needed) ...
+    ]
+
+Note that when you do this, it is important to ensure the conditions are such
+that there is exactly one pin possible for a given platform configuration.
+Otherwise your build will fail or ``pip`` may refuse to install your package
+*only* on that configuration (so you likely won't see it in CI).
+The **oldest-supported-numpy** repository contains tests, so for safety you
+may want to implement your constraints in its ``setup.cfg`` and run the
+tests with ``pytest`` to validate those constraints.
+
+Why isn't ``oldest-supported-numpy`` available for Conda, Homebrew, Debian, etc.?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``pyproject.toml`` format is specific to PyPI. Other packaging systems have
+their own metadata formats and ways of specifying dependencies. Typically they
+don't need anything like **oldest-supported-numpy** because either (a) they ship
+only a single NumPy version for a given release (typically the case for Linux
+distros and Homebrew), or (b) they have a more explicit way of managing ABI
+compatibility (see for example conda-forge's ``pin_compatible`` feature:
+https://conda-forge.org/docs/maintainer/knowledge_base.html#linking-numpy).
 
 What about having a catchier name for this package?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
