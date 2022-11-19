@@ -33,7 +33,7 @@ def get_package_dependencies() -> List[Requirement]:
 # The ordering of these markers is important, and is used in test names.
 # The tests, when run, look like: PyPy-3.6-Linux-aarch64` (bottom-first)
 @pytest.mark.parametrize("platform_machine", ["x86", "x86_64", "aarch64", "s390x", "arm64", "loongarch64"])
-@pytest.mark.parametrize("platform_system", ["Linux", "Windows", "Darwin", "AIX"])
+@pytest.mark.parametrize("platform_system", ["Linux", "Windows", "Darwin", "AIX", "OS400"])
 @pytest.mark.parametrize("python_version", ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12"])
 @pytest.mark.parametrize("platform_python_implementation", ["CPython", "PyPy"])
 def test_has_at_most_one_pinned_dependency(
@@ -43,11 +43,11 @@ def test_has_at_most_one_pinned_dependency(
     platform_python_implementation,
 ):
     # These are known to be platforms that are not valid / possible at this time.
-    if platform_system == "AIX":
+    if platform_system in ("AIX", "OS400"):
         if platform_machine in ["aarch64", "loongarch64"]:
-            pytest.skip("AIX and aarch64 are mutually exclusive.")
+            pytest.skip(f"{platform_system} and {platform_machine} are mutually exclusive.")
         if platform_python_implementation == "PyPy":
-            pytest.skip("AIX and PyPy are mutually exclusive.")
+            pytest.skip(f"{platform_system} and PyPy are mutually exclusive.")
 
     if platform_python_implementation == "PyPy" and (platform_machine not in ["x86_64", "aarch64"]):
         pytest.skip(f"PyPy is not supported on {platform_machine}.")
