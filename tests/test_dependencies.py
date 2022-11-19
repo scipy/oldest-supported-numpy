@@ -49,6 +49,9 @@ def test_has_at_most_one_pinned_dependency(
         if platform_python_implementation == "PyPy":
             pytest.skip("AIX and PyPy are mutually exclusive.")
 
+    if platform_system == "OS400":
+        pytest.skip("Skip this test for OS400.")
+
     if platform_python_implementation == "PyPy" and (platform_machine not in ["x86_64", "aarch64"]):
         pytest.skip(f"PyPy is not supported on {platform_machine}.")
 
