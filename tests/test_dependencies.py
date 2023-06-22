@@ -46,11 +46,18 @@ def test_has_at_most_one_pinned_dependency(
     if platform_system in ("AIX", "OS400"):
         if platform_machine in ["aarch64", "loongarch64"]:
             pytest.skip(f"{platform_system} and {platform_machine} are mutually exclusive.")
-        if platform_python_implementation == "PyPy":
-            pytest.skip(f"{platform_system} and PyPy are mutually exclusive.")
 
-    if platform_python_implementation == "PyPy" and (platform_machine not in ["x86_64", "aarch64"]):
-        pytest.skip(f"PyPy is not supported on {platform_machine}.")
+    # currently linux-{64, aarch64, ppc64le}, osx-64, win-64; no support for arm64 yet
+    pypy_pairs = [
+        ("Linux", "x86_64"),
+        ("Linux", "aarch64"),
+        # ("Linux", "ppc64le"),
+        ("Darwin", "x86_64"),
+        ("Windows", "x86_64"),
+    ]
+    if (platform_python_implementation == "PyPy"
+            and (platform_system, platform_machine) not in pypy_pairs):
+        pytest.skip(f"PyPy is not supported on {platform_system}/{platform_machine}.")
 
     environment = {
         "python_version": python_version,
