@@ -53,7 +53,7 @@ def test_has_at_most_one_pinned_dependency(
             valid = True   # otherwise, Linux is everywhere
         case ["Darwin", ("x86_64" | "arm64")]:
             valid = True
-        case ["Windows", ("x86" | "x86_64")]:
+        case ["Windows", ("x86" | "x86_64" | "arm64")]:
             valid = True
         # TODO: verify architectures for AIX/OS400
         case [("AIX" | "OS400"), ("x86" | "x86_64" | "s390x")]:
@@ -116,6 +116,9 @@ def test_has_at_most_one_pinned_dependency(
         case ["OS400", ("x86" | "x86_64" | "s390x")]:
             # only supported on CPython 3.9, see skip above
             expect_pin = True  # as of 1.23.3
+        # if there is no information to the contrary, we expect the default pins
+        case ["Windows", "arm64"]:
+            expect_pin = True
 
     # we only expect a pin for released python versions
     expect_pin = False if (python_version == "3.12") else expect_pin
