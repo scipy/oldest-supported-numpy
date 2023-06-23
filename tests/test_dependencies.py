@@ -26,7 +26,7 @@ def test_has_at_most_one_pinned_dependency(
 ):
     # These are known to be platforms that are not valid / possible at this time.
     # due the the sheer variety, the default assumption is that a given combination
-    # is invalid (and thus skipped), allowing us to specify valid cases more easily
+    # is invalid, allowing us to specify valid cases more easily below
     valid = False
     match (platform_system, platform_machine):
         case ["Linux", "arm64"]:
@@ -40,8 +40,6 @@ def test_has_at_most_one_pinned_dependency(
         # TODO: verify architectures for AIX/OS400
         case [("AIX" | "OS400"), ("x86" | "x86_64" | "s390x")]:
             valid = True
-    if not valid:
-        pytest.skip(f"{platform_system} and {platform_machine} are mutually exclusive.")
 
     # currently linux-{64, aarch64, ppc64le}, osx-64, win-64; no support for arm64 yet
     pypy_pairs = [
@@ -53,10 +51,11 @@ def test_has_at_most_one_pinned_dependency(
     ]
     if (platform_python_implementation == "PyPy"
             and (platform_system, platform_machine) not in pypy_pairs):
-        pytest.skip(f"PyPy is not supported on {platform_system}/{platform_machine}.")
+        valid = False
 
     if platform_system == "OS400" and python_version != "3.9":
-        pytest.skip(f"IBMi only supported on Python {python_version}.")
+        # IBMi only supported on CPython 3.9, see gh-66
+        valid = False
 
     environment = {
         "python_version": python_version,
@@ -96,7 +95,7 @@ def test_has_at_most_one_pinned_dependency(
         case ["AIX", ("x86" | "x86_64" | "s390x")]:
             expect_pin = True  # as of 1.16
         case ["OS400", ("x86" | "x86_64" | "s390x")]:
-            # only supported on CPython 3.9, see skip above
+            # only supported on CPython 3.9, see above
             expect_pin = True  # as of 1.23.3
         # if there is no information to the contrary, we expect the default pins
         case ["Linux", "ppc64le"]:
@@ -104,10 +103,17 @@ def test_has_at_most_one_pinned_dependency(
         case ["Windows", "arm64"]:
             expect_pin = True
 
-    # we only expect a pin for released python versions
-    expect_pin = False if (python_version == "3.12") else expect_pin
-    # also check that cases with expect_pin==False should _not_ have a pin
-    log_msg = "Expected " + ("exactly one pin" if expect_pin else "no pins")
-    assert (
-        len(filtered_requirements) == int(expect_pin)
-    ), f"{log_msg}.\n{pprint.pformat(environment)}"
+    # for valid combinations, we test more strictly: expect exactly zero or one pins
+    if valid:
+        # we only expect a pin for released python versions
+        expect_pin = False if (python_version == "3.12") else expect_pin
+        log_msg = "Expected " + ("exactly one pin" if expect_pin else "no pins")
+        assert (
+            len(filtered_requirements) == int(expect_pin)
+        ), f"{log_msg}.\n{pprint.pformat(environment)}"
+    else:
+        # on invalid platform / interpreter combinations, test
+        # that at least we do not produce more than one pin
+        assert (
+            len(filtered_requirements) <= 1
+        ),  f"Expected no more than one pin.\n{pprint.pformat(environment)}"
