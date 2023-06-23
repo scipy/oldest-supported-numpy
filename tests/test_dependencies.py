@@ -73,6 +73,9 @@ def test_has_at_most_one_pinned_dependency(
             and (platform_system, platform_machine) not in pypy_pairs):
         pytest.skip(f"PyPy is not supported on {platform_system}/{platform_machine}.")
 
+    if platform_system == "OS400" and python_version != "3.9":
+        pytest.skip(f"IBMi only supported on Python {python_version}.")
+
     environment = {
         "python_version": python_version,
         "platform_python_implementation": platform_python_implementation,
@@ -90,9 +93,37 @@ def test_has_at_most_one_pinned_dependency(
 
         filtered_requirements.append(req)
 
+    # since we cannot run the installation tests on all platforms,
+    # we formulate the conditions when we expect a pin
+    expect_pin = False
+    match (platform_system, platform_machine):
+        case [("Linux" | "Darwin" | "Windows"), "x86_64"]:
+            expect_pin = True  # baseline
+        case [("Linux" | "Windows"), "x86"]:
+            # 32 bit wheels on Linux only until numpy 1.21, but should still be compatible
+            expect_pin = True
+        case ["Linux", "aarch64"]:
+            expect_pin = True  # as of 1.19.2
+        case ["Darwin", "arm64"]:
+            expect_pin = True  # as of 1.21
+        # no official wheels, but register minimum compatibility
+        case ["Linux", "s390x"]:
+            expect_pin = True  # as of 1.17.5
+        case ["Linux", "loongarch64"]:
+            expect_pin = True  # as of 1.22
+        case ["AIX", ("x86" | "x86_64" | "s390x")]:
+            expect_pin = True  # as of 1.16
+        case ["OS400", ("x86" | "x86_64" | "s390x")]:
+            # only supported on CPython 3.9, see skip above
+            expect_pin = True  # as of 1.23.3
+
+    # we only expect a pin for released python versions
+    expect_pin = False if (python_version == "3.12") else expect_pin
+    # also check that cases with expect_pin==False should _not_ have a pin
+    log_msg = "Expected " + ("exactly one pin" if expect_pin else "no pins")
     assert (
-        len(filtered_requirements) <= 1
-    ), f"Expected no more than one pin.\n{pprint.pformat(environment)}"
+        len(filtered_requirements) == int(expect_pin)
+    ), f"{log_msg}.\n{pprint.pformat(environment)}"
 
 
 def test_valid_numpy_is_installed():
