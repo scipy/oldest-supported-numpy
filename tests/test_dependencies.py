@@ -32,7 +32,7 @@ def get_package_dependencies() -> List[Requirement]:
 
 # The ordering of these markers is important, and is used in test names.
 # The tests, when run, look like: PyPy-3.6-Linux-aarch64` (bottom-first)
-@pytest.mark.parametrize("platform_machine", ["x86", "x86_64", "aarch64", "s390x", "arm64", "loongarch64"])
+@pytest.mark.parametrize("platform_machine", ["x86", "x86_64", "aarch64", "ppc64le", "s390x", "arm64", "loongarch64"])
 @pytest.mark.parametrize("platform_system", ["Linux", "Windows", "Darwin", "AIX", "OS400"])
 @pytest.mark.parametrize("python_version", ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"])
 @pytest.mark.parametrize("platform_python_implementation", ["CPython", "PyPy"])
@@ -65,7 +65,7 @@ def test_has_at_most_one_pinned_dependency(
     pypy_pairs = [
         ("Linux", "x86_64"),
         ("Linux", "aarch64"),
-        # ("Linux", "ppc64le"),
+        ("Linux", "ppc64le"),
         ("Darwin", "x86_64"),
         ("Windows", "x86_64"),
     ]
@@ -117,6 +117,8 @@ def test_has_at_most_one_pinned_dependency(
             # only supported on CPython 3.9, see skip above
             expect_pin = True  # as of 1.23.3
         # if there is no information to the contrary, we expect the default pins
+        case ["Linux", "ppc64le"]:
+            expect_pin = True
         case ["Windows", "arm64"]:
             expect_pin = True
 
