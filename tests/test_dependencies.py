@@ -43,9 +43,23 @@ def test_has_at_most_one_pinned_dependency(
     platform_python_implementation,
 ):
     # These are known to be platforms that are not valid / possible at this time.
-    if platform_system in ("AIX", "OS400"):
-        if platform_machine in ["aarch64", "loongarch64"]:
-            pytest.skip(f"{platform_system} and {platform_machine} are mutually exclusive.")
+    # due the the sheer variety, the default assumption is that a given combination
+    # is invalid (and thus skipped), allowing us to specify valid cases more easily
+    valid = False
+    match (platform_system, platform_machine):
+        case ["Linux", "arm64"]:
+            valid = False  # express "everything but arm64"; called aarch64 on linux
+        case ["Linux", _]:
+            valid = True   # otherwise, Linux is everywhere
+        case ["Darwin", ("x86_64" | "arm64")]:
+            valid = True
+        case ["Windows", ("x86" | "x86_64")]:
+            valid = True
+        # TODO: verify architectures for AIX/OS400
+        case [("AIX" | "OS400"), ("x86" | "x86_64" | "s390x")]:
+            valid = True
+    if not valid:
+        pytest.skip(f"{platform_system} and {platform_machine} are mutually exclusive.")
 
     # currently linux-{64, aarch64, ppc64le}, osx-64, win-64; no support for arm64 yet
     pypy_pairs = [
