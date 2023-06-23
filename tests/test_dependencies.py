@@ -1,33 +1,14 @@
 """Tests to ensure that the dependency declarations are sane.
 """
 
-import configparser
 import pprint
-from functools import lru_cache
-from pathlib import Path
-from typing import List
 
 import pytest
 from packaging.requirements import Requirement
 
-SETUP_CFG_FILE = Path(__file__).parent.parent / "setup.cfg"
-
 
 def is_pinned(requirement: Requirement) -> bool:
     return "==" in str(requirement.specifier)
-
-
-@lru_cache(maxsize=None)
-def get_package_dependencies() -> List[Requirement]:
-    """A cached reader for getting dependencies of this package."""
-    parser = configparser.ConfigParser()
-    parser.read(SETUP_CFG_FILE)
-
-    return [
-        Requirement(line)
-        for line in parser.get("options", "install_requires").splitlines()
-        if line
-    ]
 
 
 # The ordering of these markers is important, and is used in test names.
@@ -41,6 +22,7 @@ def test_has_at_most_one_pinned_dependency(
     platform_system,
     python_version,
     platform_python_implementation,
+    cfg_requirements,
 ):
     # These are known to be platforms that are not valid / possible at this time.
     # due the the sheer variety, the default assumption is that a given combination
@@ -84,7 +66,7 @@ def test_has_at_most_one_pinned_dependency(
     }
 
     filtered_requirements = []
-    for req in get_package_dependencies():
+    for req in cfg_requirements:
         assert req.marker
         if not req.marker.evaluate(environment):
             continue
@@ -131,9 +113,9 @@ def test_has_at_most_one_pinned_dependency(
     ), f"{log_msg}.\n{pprint.pformat(environment)}"
 
 
-def test_valid_numpy_is_installed():
+def test_valid_numpy_is_installed(cfg_requirements):
     filtered_requirements = []
-    for req in get_package_dependencies():
+    for req in cfg_requirements:
         if req.marker.evaluate():
             filtered_requirements.append(req)
 
