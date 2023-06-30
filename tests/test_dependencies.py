@@ -91,7 +91,7 @@ def test_has_at_most_one_pinned_dependency(
         case ["Linux", "s390x"]:
             expect_pin = True  # as of 1.17.5
         case ["Linux", "loongarch64"]:
-            expect_pin = True  # as of 1.22
+            expect_pin = (python_version != "3.7")  # as of 1.22
         case ["AIX", ("x86" | "x86_64" | "s390x")]:
             expect_pin = True  # as of 1.16
         case ["OS400", ("x86" | "x86_64" | "s390x")]:
