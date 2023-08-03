@@ -42,4 +42,4 @@ jobs:
         run: pip install -r tests/requirements.txt
 
       - name: Test valid numpy installed
-        run: pytest -k test_valid_numpy_is_installed
+        run: pytest tests/test_installation.py -k test_valid_numpy_is_installed
