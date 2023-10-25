@@ -106,7 +106,7 @@ def test_has_at_most_one_pinned_dependency(
     # for valid combinations, we test more strictly: expect exactly zero or one pins
     if valid:
         # we only expect a pin for released python versions
-        expect_pin = False if (python_version == "3.12") else expect_pin
+        expect_pin = False if (python_version == "3.13") else expect_pin
         log_msg = "Expected " + ("exactly one pin" if expect_pin else "no pins")
         assert (
             len(filtered_requirements) == int(expect_pin)
