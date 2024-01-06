@@ -2,6 +2,24 @@
    :target: https://pypi.org/project/oldest-supported-numpy/
    :alt: PyPI
 
+Deprecation notice for NumPy 2.0
+--------------------------------
+
+**This package is deprecated.**
+
+Until NumPy 1.25.0 this package was needed to be able to target the
+oldest supported NumPy version for packages using the NumPy C API.
+That targeting was necessary in order to obtain wheel for distribution
+on PyPI. However, a new "C API exporting" feature in NumPy 1.25.0 made
+that unnecessary. And with NumPy 2.0, it is now actually necessary
+to use >=2.0 at build time for packages that want to support both
+NumPy 1.xx and 2.0.
+
+All users should migrate to expressing a build dependency on ``numpy``
+directly, according to the guidance given in
+`Adding a dependency on NumPy <https://numpy.org/devdocs/dev/depending_on_numpy.html#adding-a-dependency-on-numpy>`__.
+
+
 About
 -----
 
